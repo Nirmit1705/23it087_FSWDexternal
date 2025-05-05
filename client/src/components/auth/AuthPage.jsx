@@ -1,78 +1,43 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import Login from './Login';
 import Register from './Register';
-import './AuthPage.css';
-import './input-icon.css';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [mounted, setMounted] = useState(false);
-  
-  // Ensure proper animations after initial mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   
   return (
-    <div className="auth-container">
-      <div className="auth-background">
-        <div className="auth-blob"></div>
-        <div className="auth-blob-2"></div>
-        <div className="auth-gradient"></div>
-      </div>
-      
-      <motion.div 
-        className="auth-card"
-        initial={{ opacity: 0, y: 20 }}
-        animate={mounted ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="auth-header">
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={mounted ? { opacity: 1 } : {}}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
+    <div className="w-full min-h-screen flex justify-center items-center p-4 box-border">
+      <div className="bg-card-bg rounded-custom w-full max-w-[500px] p-8 shadow-custom border border-white/10 my-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl mb-2 font-bold text-text-primary">
             Employee Management
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={mounted ? { opacity: 1 } : {}}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="auth-subtitle"
-          >
+          </h1>
+          <p className="text-text-secondary">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
-          </motion.p>
+          </p>
         </div>
         
-        <div className="auth-toggle">
+        <div className="flex bg-input-bg rounded-md relative mb-8 p-1">
           <button 
-            className={`toggle-btn ${isLogin ? 'active' : ''}`}
+            className={`flex-1 border-none p-3 z-[2] transition-colors duration-200 ${isLogin ? 'text-text-primary bg-accent-primary' : 'text-text-secondary bg-transparent'} font-medium rounded-md`}
             onClick={() => setIsLogin(true)}
             type="button"
           >
             Login
           </button>
           <button 
-            className={`toggle-btn ${!isLogin ? 'active' : ''}`}
+            className={`flex-1 border-none p-3 z-[2] transition-colors duration-200 ${!isLogin ? 'text-text-primary bg-accent-primary' : 'text-text-secondary bg-transparent'} font-medium rounded-md`}
             onClick={() => setIsLogin(false)}
             type="button"
           >
             Register
           </button>
-          <motion.div 
-            className="toggle-indicator"
-            initial={false}
-            animate={{ x: isLogin ? 0 : '100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          />
         </div>
         
-        <div className="auth-form-container">
+        <div className="relative w-full">
           {isLogin ? <Login /> : <Register setIsLogin={setIsLogin} />}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

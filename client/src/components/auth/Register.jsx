@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -97,20 +96,19 @@ const Register = ({ setIsLogin }) => {
   };
 
   return (
-    <motion.form 
-      className="auth-form"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+    <form 
+      className="mt-6 w-full"
       onSubmit={handleSubmit}
     >
       {errors.general && (
-        <div className="error-general">{errors.general}</div>
+        <div className="bg-danger/10 border border-danger rounded-custom text-danger p-3 mb-6 text-center w-full">
+          {errors.general}
+        </div>
       )}
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiUser className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiUser className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type="text"
             id="name"
@@ -118,15 +116,15 @@ const Register = ({ setIsLogin }) => {
             placeholder="Full name"
             value={formData.name}
             onChange={handleChange}
-            className={errors.name ? 'error' : ''}
+            className={`pl-12 pr-4 py-3 text-base bg-input-bg border ${errors.name ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
         </div>
-        {errors.name && <div className="error-message">{errors.name}</div>}
+        {errors.name && <div className="text-danger text-sm mt-1">{errors.name}</div>}
       </div>
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiMail className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiMail className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type="email"
             id="email"
@@ -134,15 +132,15 @@ const Register = ({ setIsLogin }) => {
             placeholder="Email address"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error' : ''}
+            className={`pl-12 pr-4 py-3 text-base bg-input-bg border ${errors.email ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
         </div>
-        {errors.email && <div className="error-message">{errors.email}</div>}
+        {errors.email && <div className="text-danger text-sm mt-1">{errors.email}</div>}
       </div>
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiLock className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiLock className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type={showPassword ? "text" : "password"}
             id="password"
@@ -150,22 +148,22 @@ const Register = ({ setIsLogin }) => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className={errors.password ? 'error' : ''}
+            className={`pl-12 pr-12 py-3 text-base bg-input-bg border ${errors.password ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
           <button
             type="button"
-            className="password-toggle"
+            className="absolute right-4 bg-transparent border-none p-0 cursor-pointer text-text-secondary flex items-center justify-center h-auto w-auto min-w-[24px] z-[1] hover:text-text-primary"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <FiEyeOff /> : <FiEye />}
           </button>
         </div>
-        {errors.password && <div className="error-message">{errors.password}</div>}
+        {errors.password && <div className="text-danger text-sm mt-1">{errors.password}</div>}
       </div>
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiLock className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiLock className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type={showConfirmPassword ? "text" : "password"}
             id="confirmPassword"
@@ -173,37 +171,31 @@ const Register = ({ setIsLogin }) => {
             placeholder="Confirm password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={errors.confirmPassword ? 'error' : ''}
+            className={`pl-12 pr-12 py-3 text-base bg-input-bg border ${errors.confirmPassword ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
           <button
             type="button"
-            className="password-toggle"
+            className="absolute right-4 bg-transparent border-none p-0 cursor-pointer text-text-secondary flex items-center justify-center h-auto w-auto min-w-[24px] z-[1] hover:text-text-primary"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
           </button>
         </div>
-        {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+        {errors.confirmPassword && <div className="text-danger text-sm mt-1">{errors.confirmPassword}</div>}
       </div>
       
-      <motion.button
+      <button
         type="submit"
         disabled={loading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        className="w-full py-3 mt-4 text-base font-medium bg-accent-primary text-white rounded-custom cursor-pointer transition-colors duration-200 hover:bg-accent-secondary disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {loading ? "Creating account..." : "Create account"}
-      </motion.button>
+      </button>
       
-      <motion.p 
-        className="auth-footer"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-      >
-        By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-      </motion.p>
-    </motion.form>
+      <p className="text-center mt-6 text-[0.9rem] text-text-secondary">
+        By registering, you agree to our <a href="#" className="text-accent-primary font-medium hover:text-accent-secondary">Terms of Service</a> and <a href="#" className="text-accent-primary font-medium hover:text-accent-secondary">Privacy Policy</a>.
+      </p>
+    </form>
   );
 };
 

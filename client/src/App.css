@@ -1,14 +1,11 @@
 /* Reset the original styling to prevent conflicts */
 #root {
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  text-align: left;
+  @apply max-w-full m-0 p-0 text-left;
 }
 
 /* Toast notification styling */
 .Toastify__toast {
-  border-radius: var(--border-radius);
+  border-radius: 6px;
 }
 
 .Toastify__toast-body {

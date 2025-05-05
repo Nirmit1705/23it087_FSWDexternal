@@ -7,18 +7,20 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <ToastContainer 
-        position="top-right" 
-        theme="dark" 
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-      />
-      <Routes>
-        <Route path="/" element={<AuthPage />} />
-        {/* Add more routes as you develop your app */}
-      </Routes>
+      <div className="min-h-screen bg-bg-primary">
+        <ToastContainer 
+          position="top-right" 
+          theme="dark" 
+          autoClose={3000}
+          hideProgressBar={false}
+          closeOnClick
+          pauseOnHover
+        />
+        <Routes>
+          <Route path="/" element={<AuthPage />} />
+          {/* Add more routes as you develop your app */}
+        </Routes>
+      </div>
     </Router>
   );
 }

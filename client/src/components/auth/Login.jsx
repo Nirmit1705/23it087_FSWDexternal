@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -81,20 +80,19 @@ const Login = () => {
   };
 
   return (
-    <motion.form 
-      className="auth-form"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+    <form 
+      className="mt-6 w-full"
       onSubmit={handleSubmit}
     >
       {errors.general && (
-        <div className="error-general">{errors.general}</div>
+        <div className="bg-danger/10 border border-danger rounded-custom text-danger p-3 mb-6 text-center w-full">
+          {errors.general}
+        </div>
       )}
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiMail className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiMail className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type="email"
             id="email"
@@ -102,15 +100,15 @@ const Login = () => {
             placeholder="Email address"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error' : ''}
+            className={`pl-12 pr-4 py-3 text-base bg-input-bg border ${errors.email ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
         </div>
-        {errors.email && <div className="error-message">{errors.email}</div>}
+        {errors.email && <div className="text-danger text-sm mt-1">{errors.email}</div>}
       </div>
       
-      <div className="form-group">
-        <div className="input-icon-wrapper">
-          <FiLock className="input-icon" />
+      <div className="mb-6">
+        <div className="relative flex items-center w-full">
+          <FiLock className="absolute left-4 text-text-secondary text-lg z-[1] pointer-events-none" />
           <input
             type={showPassword ? "text" : "password"}
             id="password"
@@ -118,42 +116,39 @@ const Login = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className={errors.password ? 'error' : ''}
+            className={`pl-12 pr-12 py-3 text-base bg-input-bg border ${errors.password ? 'border-danger' : 'border-white/10'} rounded-custom w-full focus:outline-none focus:border-accent-primary`}
           />
           <button
             type="button"
-            className="password-toggle"
+            className="absolute right-4 bg-transparent border-none p-0 cursor-pointer text-text-secondary flex items-center justify-center h-auto w-auto min-w-[24px] z-[1] hover:text-text-primary"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <FiEyeOff /> : <FiEye />}
           </button>
         </div>
-        {errors.password && <div className="error-message">{errors.password}</div>}
+        {errors.password && <div className="text-danger text-sm mt-1">{errors.password}</div>}
       </div>
       
-      <motion.div
-        className="form-footer"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        <div className="remember-forgot">
-          <label className="remember-me">
-            <input type="checkbox" /> Remember me
+      <div className="text-center mt-4 text-[0.9rem] text-text-secondary w-full">
+        <div className="flex justify-between items-center mt-2 mb-4">
+          <label className="flex items-center cursor-pointer text-text-secondary">
+            <input type="checkbox" className="mr-2 w-auto h-auto min-w-[16px] min-h-[16px]" />
+            Remember me
           </label>
-          <a href="#" className="forgot-password">Forgot password?</a>
+          <a href="#" className="text-accent-primary text-[0.9rem] hover:text-accent-secondary">
+            Forgot password?
+          </a>
         </div>
-      </motion.div>
+      </div>
       
-      <motion.button
+      <button
         type="submit"
         disabled={loading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        className="w-full py-3 mt-4 text-base font-medium bg-accent-primary text-white rounded-custom cursor-pointer transition-colors duration-200 hover:bg-accent-secondary disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {loading ? "Signing in..." : "Sign in"}
-      </motion.button>
-    </motion.form>
+      </button>
+    </form>
   );
 };
 

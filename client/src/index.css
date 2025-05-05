@@ -1,23 +1,39 @@
-:root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  /* Custom dark theme variables */
-  --bg-primary: #1e1e2e;
-  --bg-secondary: #292a3e;
+@layer base {
+  :root {
+    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: dark;
+  }
+  
+  body {
+    @apply m-0 min-w-[320px] min-h-screen bg-bg-primary text-text-primary;
+  }
+  
+  #root {
+    @apply w-full min-h-screen;
+  }
+}
+
+:root {
+  /* Dark grey theme variables */
+  --bg-primary: #2d2d3a;
+  --bg-secondary: #3a3a48;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
-  --accent-primary: #7b68ee;  /* Unique shade of purple */
-  --accent-secondary: #4d76fd; /* Unique shade of blue */
-  --danger: #ff5d8f; /* Modern pink */
-  --success: #3ecfb2; /* Turquoise */
-  --card-bg: #2a2b3d;
-  --input-bg: #1a1b29;
-  --border-radius: 12px;
-  --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --accent-primary: #4a6fa5;
+  --accent-secondary: #5d87c6;
+  --danger: #e53e3e;
+  --success: #38a169;
+  --card-bg: #35353f;
+  --input-bg: #2a2a35;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 
-  color-scheme: dark;
   color: var(--text-primary);
   background-color: var(--bg-primary);
 
@@ -25,7 +41,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
 }
 
 * {
@@ -34,22 +49,11 @@
   padding: 0;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
-}
-
 a {
   font-weight: 500;
   color: var(--accent-primary);
   text-decoration: inherit;
-  transition: color 0.25s ease;
+  transition: color 0.2s ease;
 }
 
 a:hover {
@@ -57,7 +61,7 @@ a:hover {
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2.2em;
   line-height: 1.1;
 }
 
@@ -71,17 +75,16 @@ button {
   background-color: var(--accent-primary);
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: background-color 0.2s ease;
 }
 
 button:hover {
   background-color: var(--accent-secondary);
-  transform: translateY(-2px);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px auto -webkit-focus-ring-color;
 }
 
 input, textarea, select {
@@ -92,13 +95,12 @@ input, textarea, select {
   padding: 12px 16px;
   font-size: 1em;
   width: 100%;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(123, 104, 238, 0.2);
 }
 
 /* Form elements */
