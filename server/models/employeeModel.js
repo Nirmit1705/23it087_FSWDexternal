@@ -29,28 +29,24 @@ const employeeSchema = new mongoose.Schema(
     },
     employeeType: {
       type: String,
-      required: [true, 'Employee type is required'],
       enum: ['Full-time', 'Part-time', 'Contract', 'Intern'],
       default: 'Full-time'
     },
     department: {
       type: String,
-      required: [true, 'Department is required'],
-      trim: true
+      default: ''
     },
     position: {
       type: String,
-      required: [true, 'Position is required'],
-      trim: true
+      default: ''
     },
     joinDate: {
       type: Date,
-      required: [true, 'Join date is required'],
       default: Date.now
     },
     salary: {
       type: Number,
-      required: [true, 'Salary is required']
+      default: 0
     },
     profilePicture: {
       type: String,
@@ -59,23 +55,22 @@ const employeeSchema = new mongoose.Schema(
     address: {
       street: {
         type: String,
-        required: [true, 'Street address is required']
+        default: ''
       },
       city: {
         type: String,
-        required: [true, 'City is required']
+        default: ''
       },
       state: {
         type: String,
-        required: [true, 'State is required']
+        default: ''
       },
       zipCode: {
         type: String,
-        required: [true, 'Zip code is required']
+        default: ''
       },
       country: {
         type: String,
-        required: [true, 'Country is required'],
         default: 'India'
       }
     },

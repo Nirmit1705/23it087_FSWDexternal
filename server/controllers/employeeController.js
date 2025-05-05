@@ -1,10 +1,11 @@
 import asyncHandler from 'express-async-handler';
 import Employee from '../models/employeeModel.js';
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
 
-// @desc    Get all employees with pagination
-// @route   GET /api/employees
-// @access  Private
+// Ensure environment variables are loaded
+dotenv.config();
+
 const getEmployees = asyncHandler(async (req, res) => {
   const pageSize = 10;
   const page = Number(req.query.pageNumber) || 1;
@@ -35,9 +36,6 @@ const getEmployees = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get employee by ID
-// @route   GET /api/employees/:id
-// @access  Private
 const getEmployeeById = asyncHandler(async (req, res) => {
   const employee = await Employee.findById(req.params.id);
 
@@ -53,60 +51,174 @@ const getEmployeeById = asyncHandler(async (req, res) => {
 // @route   POST /api/employees
 // @access  Private
 const createEmployee = asyncHandler(async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    employeeType,
-    department,
-    position,
-    joinDate,
-    salary,
-    address,
-    skills,
-    education,
-    emergencyContact
-  } = req.body;
+  try {
+    console.log('Request body:', req.body);
+    console.log('File:', req.file);
 
-  // Check if employee already exists with the same email
-  const employeeExists = await Employee.findOne({ email });
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      employeeType,
+      department,
+      position,
+      joinDate,
+      salary,
+      address,
+      skills,
+      education,
+      emergencyContact
+    } = req.body;
 
-  if (employeeExists) {
-    res.status(400);
-    throw new Error('Employee with this email already exists');
-  }
+    // Check if employee already exists with the same email
+    const employeeExists = await Employee.findOne({ email });
 
-  let profilePicture = 'default-profile.jpg';
+    if (employeeExists) {
+      res.status(400);
+      throw new Error('Employee with this email already exists');
+    }
 
-  // Handle profile picture if uploaded
-  if (req.file) {
-    profilePicture = req.file.path;
-  }
+    // Set default profile picture
+    let profilePicture = 'default-profile.jpg';
 
-  const employee = await Employee.create({
-    firstName,
-    lastName,
-    email,
-    phone,
-    employeeType,
-    department,
-    position,
-    joinDate,
-    salary,
-    profilePicture,
-    address,
-    skills: skills ? skills.split(',').map(skill => skill.trim()) : [],
-    education: education ? JSON.parse(education) : [],
-    emergencyContact: emergencyContact ? JSON.parse(emergencyContact) : {},
-    createdBy: req.user._id
-  });
+    // Handle profile picture if uploaded
+    if (req.file) {
+      console.log('Processing uploaded file:', req.file);
+      
+      try {
+        // Check if req.file already has a path from Cloudinary storage
+        if (req.file.path) {
+          console.log('Using Cloudinary storage path:', req.file.path);
+          profilePicture = req.file.path;
+        }
+        // If no path is available but there's a buffer, upload directly
+        else if (req.file.buffer) {
+          console.log('Uploading file buffer to Cloudinary manually');
+          
+          // Make sure Cloudinary is configured
+          cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+          });
+          
+          // Return a promise for the upload
+          const uploadPromise = new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: 'employee_profiles',
+                transformation: [{ width: 500, height: 500, crop: 'limit' }]
+              },
+              (error, result) => {
+                if (error) {
+                  console.error('Manual Cloudinary upload error:', error);
+                  reject(error);
+                } else {
+                  console.log('Manual Cloudinary upload success:', result.secure_url);
+                  resolve(result.secure_url);
+                }
+              }
+            );
+            
+            uploadStream.end(req.file.buffer);
+          });
+          
+          // Wait for the upload to complete
+          profilePicture = await uploadPromise;
+          console.log('Final profile picture URL:', profilePicture);
+        }
+      } catch (uploadError) {
+        console.error('Profile picture upload error:', uploadError);
+        // Continue with default picture if upload fails
+      }
+    }
 
-  if (employee) {
-    res.status(201).json(employee);
-  } else {
-    res.status(400);
-    throw new Error('Invalid employee data');
+    // Parse JSON strings if they're passed as strings
+    let parsedAddress;
+    let parsedEducation;
+    let parsedEmergencyContact;
+    let parsedSkills = skills;
+
+    try {
+      if (typeof address === 'string') {
+        parsedAddress = JSON.parse(address);
+      } else if (address) {
+        parsedAddress = address;
+      } else {
+        // Provide default address object if missing
+        parsedAddress = {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: 'India'
+        };
+      }
+
+      if (typeof education === 'string') {
+        parsedEducation = JSON.parse(education);
+      } else if (education) {
+        parsedEducation = education;
+      } else {
+        parsedEducation = [];
+      }
+
+      if (typeof emergencyContact === 'string') {
+        parsedEmergencyContact = JSON.parse(emergencyContact);
+      } else if (emergencyContact) {
+        parsedEmergencyContact = emergencyContact;
+      } else {
+        parsedEmergencyContact = {};
+      }
+
+      // Handle skills, which might be a comma-separated string
+      if (typeof skills === 'string') {
+        if (skills.trim() !== '') {
+          parsedSkills = skills.split(',').map(skill => skill.trim()).filter(Boolean);
+        } else {
+          parsedSkills = [];
+        }
+      } else if (Array.isArray(skills)) {
+        parsedSkills = skills.filter(skill => skill && skill.trim() !== '');
+      } else {
+        parsedSkills = [];
+      }
+    } catch (parseError) {
+      console.error('Error parsing form data:', parseError);
+      res.status(400);
+      throw new Error(`Invalid data format: ${parseError.message}`);
+    }
+
+    // Create the employee with parsed data
+    const employee = await Employee.create({
+      firstName,
+      lastName,
+      email,
+      phone,
+      employeeType: employeeType || 'Full-time',
+      department: department || '',
+      position: position || '',
+      joinDate: joinDate || new Date(),
+      salary: salary ? parseFloat(salary) : 0,
+      profilePicture,
+      address: parsedAddress,
+      skills: parsedSkills,
+      education: parsedEducation,
+      emergencyContact: parsedEmergencyContact,
+      createdBy: req.user._id
+    });
+
+    if (employee) {
+      res.status(201).json(employee);
+    } else {
+      res.status(400);
+      throw new Error('Invalid employee data');
+    }
+  } catch (error) {
+    console.error('Employee creation error:', error);
+    res.status(error.statusCode || 500);
+    throw new Error(error.message || 'Failed to create employee');
   }
 });
 
@@ -114,78 +226,123 @@ const createEmployee = asyncHandler(async (req, res) => {
 // @route   PUT /api/employees/:id
 // @access  Private
 const updateEmployee = asyncHandler(async (req, res) => {
-  const employee = await Employee.findById(req.params.id);
+  try {
+    console.log('Update request body:', req.body);
+    console.log('Update file:', req.file);
+    
+    const employee = await Employee.findById(req.params.id);
 
-  if (!employee) {
-    res.status(404);
-    throw new Error('Employee not found');
-  }
-
-  // Handle profile picture update
-  let profilePicture = employee.profilePicture;
-  
-  if (req.file) {
-    // Delete the old image from Cloudinary if it's not the default image
-    if (employee.profilePicture && employee.profilePicture !== 'default-profile.jpg') {
-      try {
-        const publicId = employee.profilePicture.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`employee_profiles/${publicId}`);
-      } catch (error) {
-        console.error('Error deleting old profile picture:', error);
-      }
+    if (!employee) {
+      res.status(404);
+      throw new Error('Employee not found');
     }
-    profilePicture = req.file.path;
-  }
 
-  // Update employee data
-  const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    employeeType,
-    department,
-    position,
-    joinDate,
-    salary,
-    address,
-    skills,
-    education,
-    emergencyContact
-  } = req.body;
+    // Handle profile picture update
+    let profilePicture = employee.profilePicture;
+    
+    if (req.file) {
+      // Delete the old image from Cloudinary if it's not the default image
+      if (employee.profilePicture && employee.profilePicture !== 'default-profile.jpg') {
+        try {
+          const publicId = employee.profilePicture.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`employee_profiles/${publicId}`);
+        } catch (error) {
+          console.error('Error deleting old profile picture:', error);
+        }
+      }
+      profilePicture = req.file.path;
+    }
 
-  employee.firstName = firstName || employee.firstName;
-  employee.lastName = lastName || employee.lastName;
-  employee.email = email || employee.email;
-  employee.phone = phone || employee.phone;
-  employee.employeeType = employeeType || employee.employeeType;
-  employee.department = department || employee.department;
-  employee.position = position || employee.position;
-  employee.joinDate = joinDate || employee.joinDate;
-  employee.salary = salary || employee.salary;
-  employee.profilePicture = profilePicture;
-  
-  if (address) {
-    employee.address = {
-      ...employee.address,
-      ...JSON.parse(address)
-    };
-  }
-  
-  if (skills) {
-    employee.skills = skills.split(',').map(skill => skill.trim());
-  }
-  
-  if (education) {
-    employee.education = JSON.parse(education);
-  }
-  
-  if (emergencyContact) {
-    employee.emergencyContact = JSON.parse(emergencyContact);
-  }
+    // Parse request body
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      employeeType,
+      department,
+      position,
+      joinDate,
+      salary,
+      address,
+      skills,
+      education,
+      emergencyContact
+    } = req.body;
 
-  const updatedEmployee = await employee.save();
-  res.json(updatedEmployee);
+    // Parse JSON strings
+    let parsedAddress;
+    let parsedEducation;
+    let parsedEmergencyContact;
+    let parsedSkills = skills;
+
+    try {
+      if (typeof address === 'string') {
+        parsedAddress = JSON.parse(address);
+      } else if (address) {
+        parsedAddress = address;
+      }
+
+      if (typeof education === 'string') {
+        parsedEducation = JSON.parse(education);
+      } else if (education) {
+        parsedEducation = education;
+      }
+
+      if (typeof emergencyContact === 'string') {
+        parsedEmergencyContact = JSON.parse(emergencyContact);
+      } else if (emergencyContact) {
+        parsedEmergencyContact = emergencyContact;
+      }
+
+      // Handle skills, which might be a comma-separated string
+      if (typeof skills === 'string') {
+        parsedSkills = skills.split(',').map(skill => skill.trim()).filter(Boolean);
+      }
+    } catch (parseError) {
+      console.error('Error parsing form data in update:', parseError);
+      res.status(400);
+      throw new Error(`Invalid data format: ${parseError.message}`);
+    }
+
+    // Update all the employee fields
+    employee.firstName = firstName || employee.firstName;
+    employee.lastName = lastName || employee.lastName;
+    employee.email = email || employee.email;
+    employee.phone = phone || employee.phone;
+    employee.employeeType = employeeType || employee.employeeType;
+    employee.department = department || employee.department;
+    employee.position = position || employee.position;
+    employee.joinDate = joinDate || employee.joinDate;
+    employee.salary = salary ? parseFloat(salary) : employee.salary;
+    employee.profilePicture = profilePicture;
+    
+    if (parsedAddress) {
+      employee.address = {
+        ...employee.address,
+        ...parsedAddress
+      };
+    }
+    
+    if (parsedSkills) {
+      employee.skills = parsedSkills;
+    }
+    
+    if (parsedEducation) {
+      employee.education = parsedEducation;
+    }
+    
+    if (parsedEmergencyContact) {
+      employee.emergencyContact = parsedEmergencyContact;
+    }
+
+    const updatedEmployee = await employee.save();
+    res.json(updatedEmployee);
+  } catch (error) {
+    console.error('Employee update error:', error);
+    res.status(error.statusCode || 500);
+    throw new Error(error.message || 'Failed to update employee');
+  }
 });
 
 // @desc    Delete an employee
