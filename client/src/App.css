@@ -1,0 +1,29 @@
+/* Reset the original styling to prevent conflicts */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Toast notification styling */
+.Toastify__toast {
+  border-radius: var(--border-radius);
+}
+
+.Toastify__toast-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.Toastify__toast--success {
+  background-color: var(--success);
+}
+
+.Toastify__toast--error {
+  background-color: var(--danger);
+}
+
+/* Override specific styling from original App.css */
+.logo, .card, .read-the-docs {
+  display: none;
+}
